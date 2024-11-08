@@ -5,10 +5,8 @@ from typing import Tuple
 from random import sample
 from collections import namedtuple
 
-
 from numpy.linalg import svd
 from scipy.interpolate import griddata
-
 
 PadStruct = namedtuple('PadStruct',
                        ['pad_up', 'pad_down', 'pad_right', 'pad_left'])
@@ -16,6 +14,7 @@ PadStruct = namedtuple('PadStruct',
 
 class Solution:
     """Implement Projective Homography and Panorama Solution."""
+
     def __init__(self):
         pass
 
@@ -31,9 +30,15 @@ class Solution:
         Returns:
             Homography from source to destination, 3x3 numpy array.
         """
-        # return homography
-        """INSERT YOUR CODE HERE"""
-        pass
+        a = []
+        for (xs, ys), (xd, yd) in zip(match_p_src.T, match_p_dst.T):
+            a.append([-xs, -ys, -1, 0, 0, 0, xs * xd, ys * xd, xd])
+            a.append([0, 0, 0, -xs, -ys, -1, xs * yd, ys * yd, yd])
+        a = np.array(a)
+        u, s, vt = np.linalg.svd(a)
+        h = vt[-1, :]
+        h = h / h[-1]
+        return h.reshape((3, 3))
 
     @staticmethod
     def compute_forward_homography_slow(
