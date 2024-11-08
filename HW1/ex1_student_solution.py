@@ -31,9 +31,9 @@ class Solution:
             Homography from source to destination, 3x3 numpy array.
         """
         a = []
-        for (xs, ys), (xd, yd) in zip(match_p_src.T, match_p_dst.T):
-            a.append([-xs, -ys, -1, 0, 0, 0, xs * xd, ys * xd, xd])
-            a.append([0, 0, 0, -xs, -ys, -1, xs * yd, ys * yd, yd])
+        for (xsrc, ysrc), (xdst, ydst) in zip(match_p_src.T, match_p_dst.T):
+            a.append([-xsrc, -ysrc, -1, 0, 0, 0, xsrc * xdst, ysrc * xdst, xdst])
+            a.append([0, 0, 0, -xsrc, -ysrc, -1, xsrc * ydst, ysrc * ydst, ydst])
         a = np.array(a)
         u, s, vt = np.linalg.svd(a)
         h = vt[-1, :]
