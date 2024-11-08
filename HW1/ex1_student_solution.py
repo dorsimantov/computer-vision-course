@@ -172,7 +172,22 @@ class Solution:
         """
         # return mp_src_meets_model, mp_dst_meets_model
         """INSERT YOUR CODE HERE"""
-        pass
+        # Get number of points N
+        num_points = match_p_src.shape[1]
+        # Source points -> homogeneous coordinates
+        match_p_src_hom = np.vstack((match_p_src, np.ones(num_points)))
+        # Transform source points
+        match_p_src_hom_transformed = homography @ match_p_src_hom
+        # Homogeneous coordinates -> Cartesian (normalize by third row and drop it)
+        match_p_src_transformed = match_p_src_hom_transformed[:2] / match_p_src_hom_transformed[2]
+        # Find l2 distances between transformed source points and target points
+        distances = np.linalg.norm(match_p_src_transformed - match_p_dst, axis=0)
+        # Get mask of inliers by filtering out all pairs with distance above given threshold
+        inliers = distances <= max_err
+        # Choose only the D inliers
+        mp_src_meets_model = match_p_src[:, inliers]
+        mp_dst_meets_model = match_p_dst[:, inliers]
+        return mp_src_meets_model, mp_dst_meets_model
 
     def compute_homography(self,
                            match_p_src: np.ndarray,
