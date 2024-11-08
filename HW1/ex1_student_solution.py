@@ -221,7 +221,61 @@ class Solution:
         # k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
         # return homography
         """INSERT YOUR CODE HERE"""
-        pass
+        # Define the parameters
+        w = inliers_percent
+        t = max_err
+        p = 0.99
+        d = 0.5
+        n = 4
+        k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
+
+        # Initialization
+        best_model = None
+        best_error = np.inf
+
+        # For k iterations
+        for _ in range(k):
+            # Randomly select n points
+            point_indices = np.random.choice(match_p_src.shape[1], n, replace=False)
+            src_points = match_p_src[:, point_indices]
+            dst_points = match_p_dst[:, point_indices]
+
+            # Compute model using n points
+            homography = self.compute_homography_naive(src_points, dst_points)
+
+            # Find fit ratio
+            fit_percent, _ = self.test_homography(
+                homography,
+                src_points,
+                dst_points,
+                t
+            )
+
+            # If fit ratio > d
+            if fit_percent > d:
+                # Find inliers
+                src_inliers, dst_inliers = self.meet_the_model_points(
+                    homography,
+                    src_points,
+                    dst_points,
+                    t
+                )
+                # Re-compute model using all inliers
+                homography = self.compute_homography_naive(src_inliers, dst_inliers)
+                # If error is best so far, set best homography to current
+                _, error = self.test_homography(
+                    homography,
+                    src_points,
+                    dst_points,
+                    t
+                )
+                if error < best_error:
+                    best_model = homography
+                    best_error = error
+
+        # Finally, return the best homography
+        return best_model
+
 
     @staticmethod
     def compute_backward_mapping(
