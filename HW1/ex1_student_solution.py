@@ -305,7 +305,38 @@ class Solution:
 
         # return backward_warp
         """INSERT YOUR CODE HERE"""
-        pass
+        # (1) Create a mesh-grid of columns and rows of the destination image
+        dst_rows, dst_cols = np.meshgrid(np.arange(dst_image_shape[0]), np.arange(dst_image_shape[1]), indexing='ij')
+
+        # (2) Create a set of homogenous coordinates for the destination image using the mesh-grid from (1)
+        dst_homogeneous_coords = np.vstack([dst_cols.ravel(), dst_rows.ravel(), np.ones(dst_cols.size)])
+
+        # (3) Compute the corresponding coordinates in the source image using the backward projective homography
+        src_homogeneous_coords = backward_projective_homography @ dst_homogeneous_coords
+        # Homogeneous -> Cartesian
+        src_coords = src_homogeneous_coords[:2] / src_homogeneous_coords[2]
+
+        # (4) Create the mesh-grid of source image coordinates
+        src_rows, src_cols = np.meshgrid(np.arange(src_image.shape[0]), np.arange(src_image.shape[1]), indexing='ij')
+        src_coords_points = np.vstack((src_cols.ravel(), src_rows.ravel())).T
+
+        # (5) For each color channel (RGB): Use scipy's interpolation.griddata
+        # with an appropriate configuration to compute the bi-cubic interpolation of the projected coordinates
+        output_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
+        for channel in range(3):  # For each color channel
+            # Apply bicubic interpolation
+            src_values = src_image[:, :, channel].ravel()
+            interpolated_channel = griddata(
+                src_coords_points,
+                src_values,
+                src_coords.T,
+                method='cubic',
+                fill_value=0
+            )
+            output_image[:, :, channel] = interpolated_channel.reshape(dst_image_shape[0], dst_image_shape[1])
+
+        # Finally, return warped image
+        return output_image
 
     @staticmethod
     def find_panorama_shape(src_image: np.ndarray,
