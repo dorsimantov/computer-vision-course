@@ -30,17 +30,14 @@ class Solution:
         Returns:
             Homography from source to destination, 3x3 numpy array.
         """
-        if match_p_src.shape[1] < 4 or match_p_dst.shape[1] < 4:
-            raise ValueError("At least 4 point needed for Homography.")
-        if match_p_src.shape != match_p_dst.shape:
-            raise ValueError("Number of points needs to be the same between the vectors.")
         a = []
         for (xsrc, ysrc), (xdst, ydst) in zip(match_p_src.T, match_p_dst.T):
             a.append([-xsrc, -ysrc, -1, 0, 0, 0, xsrc * xdst, ysrc * xdst, xdst])
             a.append([0, 0, 0, -xsrc, -ysrc, -1, xsrc * ydst, ysrc * ydst, ydst])
         a = np.array(a)
-        u, s, vt = np.linalg.svd(a) # solving using SVD
-        h = vt[-1, :]
+        new_a = np.dot(a.T, a)
+        eigvals, eigvecs = np.linalg.eig(new_a)
+        h = eigvecs[:, np.argmin(eigvals)]  # gets smallest eigenvalue
         h = h / h[-1]
         return h.reshape((3, 3))
 
