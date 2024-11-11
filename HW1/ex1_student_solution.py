@@ -31,9 +31,16 @@ class Solution:
         Returns:
             Homography from source to destination, 3x3 numpy array.
         """
-        # return homography
-        """INSERT YOUR CODE HERE"""
-        pass
+        a = []
+        for (xsrc, ysrc), (xdst, ydst) in zip(match_p_src.T, match_p_dst.T):
+            a.append([-xsrc, -ysrc, -1, 0, 0, 0, xsrc * xdst, ysrc * xdst, xdst])
+            a.append([0, 0, 0, -xsrc, -ysrc, -1, xsrc * ydst, ysrc * ydst, ydst])
+        a = np.array(a)
+        new_a = np.dot(a.T, a)
+        eigvals, eigvecs = np.linalg.eig(new_a)
+        h = eigvecs[:, np.argmin(eigvals)]  # gets smallest eigenvalue
+        h = h / h[-1]
+        return h.reshape((3, 3))
 
     @staticmethod
     def compute_forward_homography_slow(
@@ -58,9 +65,17 @@ class Solution:
         Returns:
             The forward homography of the source image to its destination.
         """
-        # return new_image
-        """INSERT YOUR CODE HERE"""
-        pass
+        dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
+        for y in range(src_image.shape[:2][0]):
+            for x in range(src_image.shape[:2][1]):  # we'll solve it brute force with loops
+                src_point = np.array([x, y, 1])
+                dst_point = np.dot(homography, src_point)   # projection to the new coordinate system
+                dx, dy = dst_point[:2] / dst_point[2]
+                dx, dy = int(round(dx)), int(round(dy))
+                if 0 <= dx < dst_image_shape[1] and 0 <= dy < dst_image_shape[0]: # we'll check if it's in bounds
+                    dst_image[dy, dx] = src_image[y, x]
+        return dst_image
+
 
     @staticmethod
     def compute_forward_homography_fast(
@@ -89,9 +104,17 @@ class Solution:
         Returns:
             The forward homography of the source image to its destination.
         """
-        # return new_image
-        """INSERT YOUR CODE HERE"""
-        pass
+        dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
+        Hs, Ws = src_image.shape[:2]
+        ys, xs = np.meshgrid(np.arange(Hs), np.arange(Ws), indexing='ij')   # creating a meshgrid
+        src_points = np.stack([xs.ravel(), ys.ravel(), np.ones_like(xs.ravel())])
+        proj_points = homography @ src_points    # applying the homography on the meshgrid
+        proj_points /= proj_points[2, :]
+        xd = np.clip(proj_points[0, :].astype(int), 0, dst_image_shape[1] - 1)   # if not in bounds, removed
+        yd = np.clip(proj_points[1, :].astype(int), 0, dst_image_shape[0] - 1)
+        dst_image[yd, xd] = src_image[ys.ravel(), xs.ravel()]
+        return dst_image
+
 
     @staticmethod
     def test_homography(homography: np.ndarray,
