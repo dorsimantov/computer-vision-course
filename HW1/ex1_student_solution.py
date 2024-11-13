@@ -120,7 +120,30 @@ class Solution:
         """
         # return fit_percent, dist_mse
         """INSERT YOUR CODE HERE"""
-        pass
+        # Get number of points N
+        num_points = match_p_src.shape[1]
+        # Source points -> homogeneous coordinates
+        match_p_src_hom = np.vstack((match_p_src, np.ones(num_points)))
+        # Transform source points
+        match_p_src_hom_transformed = homography @ match_p_src_hom
+        # Homogeneous coordinates -> Cartesian (normalize by third row and drop it)
+        match_p_src_transformed = match_p_src_hom_transformed[:2] / match_p_src_hom_transformed[2]
+        # Find l2 distances between transformed source points and target points
+        distances = np.linalg.norm(match_p_src_transformed - match_p_dst, axis=0)
+        # Get mask of inliers by filtering out all pairs with distance above given threshold
+        inliers = distances <= max_err
+        # Number of inliers
+        num_inliers = inliers.sum()
+        # If no inliers, return dist_mse = 10 ** 9
+        if num_inliers == 0:
+            dist_mse = 10 ** 9
+        # Else, return MSE of distances over inliers only
+        else:
+            dist_mse = np.mean(np.square(distances[inliers]))
+        # Find percentage of inliers
+        fit_percent = num_inliers / num_points
+        # Return fit_percent and dist_mse
+        return fit_percent, dist_mse
 
     @staticmethod
     def meet_the_model_points(homography: np.ndarray,
@@ -149,7 +172,22 @@ class Solution:
         """
         # return mp_src_meets_model, mp_dst_meets_model
         """INSERT YOUR CODE HERE"""
-        pass
+        # Get number of points N
+        num_points = match_p_src.shape[1]
+        # Source points -> homogeneous coordinates
+        match_p_src_hom = np.vstack((match_p_src, np.ones(num_points)))
+        # Transform source points
+        match_p_src_hom_transformed = homography @ match_p_src_hom
+        # Homogeneous coordinates -> Cartesian (normalize by third row and drop it)
+        match_p_src_transformed = match_p_src_hom_transformed[:2] / match_p_src_hom_transformed[2]
+        # Find l2 distances between transformed source points and target points
+        distances = np.linalg.norm(match_p_src_transformed - match_p_dst, axis=0)
+        # Get mask of inliers by filtering out all pairs with distance above given threshold
+        inliers = distances <= max_err
+        # Choose only the D inliers
+        mp_src_meets_model = match_p_src[:, inliers]
+        mp_dst_meets_model = match_p_dst[:, inliers]
+        return mp_src_meets_model, mp_dst_meets_model
 
     def compute_homography(self,
                            match_p_src: np.ndarray,
@@ -183,7 +221,61 @@ class Solution:
         # k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
         # return homography
         """INSERT YOUR CODE HERE"""
-        pass
+        # Define the parameters
+        w = inliers_percent
+        t = max_err
+        p = 0.99
+        d = 0.5
+        n = 4
+        k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
+
+        # Initialization
+        best_model = None
+        best_error = np.inf
+
+        # For k iterations
+        for _ in range(k):
+            # Randomly select n points
+            point_indices = np.random.choice(match_p_src.shape[1], n, replace=False)
+            src_points = match_p_src[:, point_indices]
+            dst_points = match_p_dst[:, point_indices]
+
+            # Compute model using n points
+            homography = self.compute_homography_naive(src_points, dst_points)
+
+            # Find fit ratio
+            fit_percent, _ = self.test_homography(
+                homography,
+                src_points,
+                dst_points,
+                t
+            )
+
+            # If fit ratio > d
+            if fit_percent > d:
+                # Find inliers
+                src_inliers, dst_inliers = self.meet_the_model_points(
+                    homography,
+                    src_points,
+                    dst_points,
+                    t
+                )
+                # Re-compute model using all inliers
+                homography = self.compute_homography_naive(src_inliers, dst_inliers)
+                # If error is best so far, set best homography to current
+                _, error = self.test_homography(
+                    homography,
+                    src_points,
+                    dst_points,
+                    t
+                )
+                if error < best_error:
+                    best_model = homography
+                    best_error = error
+
+        # Finally, return the best homography
+        return best_model
+
 
     @staticmethod
     def compute_backward_mapping(
@@ -213,7 +305,38 @@ class Solution:
 
         # return backward_warp
         """INSERT YOUR CODE HERE"""
-        pass
+        # (1) Create a mesh-grid of columns and rows of the destination image
+        dst_rows, dst_cols = np.meshgrid(np.arange(dst_image_shape[0]), np.arange(dst_image_shape[1]), indexing='ij')
+
+        # (2) Create a set of homogenous coordinates for the destination image using the mesh-grid from (1)
+        dst_homogeneous_coords = np.vstack([dst_cols.ravel(), dst_rows.ravel(), np.ones(dst_cols.size)])
+
+        # (3) Compute the corresponding coordinates in the source image using the backward projective homography
+        src_homogeneous_coords = backward_projective_homography @ dst_homogeneous_coords
+        # Homogeneous -> Cartesian
+        src_coords = src_homogeneous_coords[:2] / src_homogeneous_coords[2]
+
+        # (4) Create the mesh-grid of source image coordinates
+        src_rows, src_cols = np.meshgrid(np.arange(src_image.shape[0]), np.arange(src_image.shape[1]), indexing='ij')
+        src_coords_points = np.vstack((src_cols.ravel(), src_rows.ravel())).T
+
+        # (5) For each color channel (RGB): Use scipy's interpolation.griddata
+        # with an appropriate configuration to compute the bi-cubic interpolation of the projected coordinates
+        output_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
+        for channel in range(3):  # For each color channel
+            # Apply bicubic interpolation
+            src_values = src_image[:, :, channel].ravel()
+            interpolated_channel = griddata(
+                src_coords_points,
+                src_values,
+                src_coords.T,
+                method='cubic',
+                fill_value=0
+            )
+            output_image[:, :, channel] = interpolated_channel.reshape(dst_image_shape[0], dst_image_shape[1])
+
+        # Finally, return warped image
+        return output_image
 
     @staticmethod
     def find_panorama_shape(src_image: np.ndarray,
