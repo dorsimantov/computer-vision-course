@@ -34,6 +34,39 @@ class Solution:
                                 num_of_cols,
                                 len(disparity_values)))
         """INSERT YOUR CODE HERE"""
+        half_win = win_size // 2
+        padded_left = np.pad(left_image,
+                             ((half_win, half_win),
+                              (half_win, half_win),
+                              (0, 0)),
+                             mode='constant')
+        padded_right = np.pad(right_image,
+                              ((half_win, half_win),
+                               (half_win, half_win),
+                               (0, 0)),
+                              mode='constant')
+
+        # Iterate through each pixel
+        for row in range(num_of_rows):
+            for col in range(num_of_cols):
+                # Extract window from left image
+                left_window = padded_left[row:row + win_size,
+                              col:col + win_size, :]
+
+                # Compute SSD for each disparity value
+                for d_idx, d in enumerate(disparity_values):
+                    # Shifted right image window
+                    if(num_of_cols + half_win*2 < col + d + win_size or win_size > col + d + win_size):
+                        ssdd_tensor[row, col, d_idx] = 100000
+                        continue
+                    right_window = padded_right[row:row + win_size,
+                                   col + d:col + d + win_size, :]
+
+                    # Compute sum of squared differences
+                    ssd = np.sum((left_window - right_window) ** 2)
+
+                    # Store in tensor
+                    ssdd_tensor[row, col, d_idx] = ssd
         ssdd_tensor -= ssdd_tensor.min()
         ssdd_tensor /= ssdd_tensor.max()
         ssdd_tensor *= 255.0
@@ -55,9 +88,16 @@ class Solution:
         Returns:
             Naive labels HxW matrix.
         """
-        # you can erase the label_no_smooth initialization.
+        # Create output matrix of the same height and width as the input tensor
         label_no_smooth = np.zeros((ssdd_tensor.shape[0], ssdd_tensor.shape[1]))
-        """INSERT YOUR CODE HERE"""
+
+        # For each pixel, find the index of the minimum SSD value
+        label_no_smooth = np.argmin(ssdd_tensor, axis=2)
+
+        # Adjust to get the correct disparity value
+        # (since argmin returns 0-based index, we need to map it to the actual disparity range)
+        label_no_smooth -= (ssdd_tensor.shape[2] - 1) // 2
+
         return label_no_smooth
 
     @staticmethod
@@ -78,18 +118,44 @@ class Solution:
         """
         num_labels, num_of_cols = c_slice.shape[0], c_slice.shape[1]
         l_slice = np.zeros((num_labels, num_of_cols))
-        """INSERT YOUR CODE HERE"""
 
-        for col in range(1, num_of_cols):
-            for d in range(num_labels):
-                prev_col_costs = l_slice[:, col - 1]
-                same_disp = prev_col_costs[d]
-                one_disp_change = np.inf if d == 0 else prev_col_costs[d - 1] + p1
-                two_disp_change = np.inf if d == num_labels - 1 else prev_col_costs[d + 1] + p1
-                big_disp_change = np.min(prev_col_costs) + p2
+        # Get the shape of the input slice
+        dsp_range, width = c_slice.shape
 
-                min_cost = min(same_disp, one_disp_change, two_disp_change, big_disp_change)
-                l_slice[d, col] = c_slice[d, col] + min_cost
+        # Initialize the output matrix
+        l_slice = np.zeros((2 * dsp_range + 1, width))
+
+        # Iterate through each column
+        for col in range(width):
+            # Get the current column
+            curr_col = c_slice[:, col]
+
+            # Normalize the current column with the minimum value from the previous column
+            if col > 0:
+                prev_col = c_slice[:, col - 1]
+                curr_col = curr_col - prev_col.min()
+
+            # Calculate the score for each disparity value in the current column
+            for d in range(dsp_range):
+                if col == 0:
+                    l_slice[d, col] = curr_col[d]
+                    continue
+                # Option 1: Score from the previous column for the same d value
+                option1 = l_slice[d, col - 1]
+
+                # Option 2: Score from the previous column with disparity value deviating by ±1, plus penalty p1
+                """option2 = l_slice[max(0, d - 1), col - 1] + p1 if col > 0 else 0
+                option2 = min(option2, l_slice[min(2 * dsp_range, d + 1), col - 1] + p1)"""
+                option2 = p1 + min(l_slice[d-1,col-1] if col > 0 else 0, l_slice[d+1,col-1] if col > 0 else 0)
+
+                # Option 3: Score from the previous column with disparity value deviating by more than 2, plus penalty p2
+                """option3 = l_slice[max(0, d - 2), col - 1] + p2 if col > 0 else 0
+                option3 = min(option3, l_slice[min(2 * dsp_range, d + 2), col - 1] + p2)"""
+
+                option3 = p2 + min(l_slice[:d-1,col-1] if d > 1 else [] + l_slice[d+1:,col-1] if d < dsp_range else [])
+
+                # Choose the minimum score and add the current column cost
+                l_slice[d, col] = curr_col[d] + min(option1, option2, option3)
 
         return l_slice
 
