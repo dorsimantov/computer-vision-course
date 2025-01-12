@@ -325,9 +325,6 @@ class Solution:
         Returns:
             The source image backward warped to the destination coordinates.
         """
-
-        # return backward_warp
-        """INSERT YOUR CODE HERE"""
         # (1) Create a mesh-grid of columns and rows of the destination image
         dst_rows, dst_cols = np.meshgrid(np.arange(dst_image_shape[0]), np.arange(dst_image_shape[1]), indexing='ij')
 
@@ -449,10 +446,14 @@ class Solution:
             A new homography which includes the backward homography and the
             translation.
         """
+
+
+
+
         # 1) the translation matrix from pads:
         tran_mat = np.array([
-        [1, 0, pad_left],
-        [0, 1, pad_up],
+        [1, 0, -pad_left],
+        [0, 1, -pad_up],
         [0, 0, 1]])
         # 2) compibe the matrices
         hom_and_tran = np.dot(backward_homography, tran_mat)
@@ -510,7 +511,6 @@ class Solution:
         backward_homography = self.add_translation_to_backward_homography(backward_homography,pad_struct.pad_left,pad_struct.pad_up)
         # (4) Compute the backward warping with the appropriate translation.
         import matplotlib.pyplot as plt
-        plt.figure()
 
         backward_warping = self.compute_backward_mapping(backward_homography, src_image, (panorama_rows_num, panorama_cols_num,3))
         plt.imshow(backward_warping)
@@ -518,14 +518,23 @@ class Solution:
         # (5) Create an empty panorama image and plant there the
         #     destination image.
         img_panorama = np.zeros((panorama_rows_num, panorama_cols_num, 3), dtype=src_image.dtype)
-        img_panorama[pad_struct.pad_up:pad_struct.pad_up + dst_image.shape[0],
-        pad_struct.pad_left:pad_struct.pad_left + dst_image.shape[1]] = dst_image
+        small_h, small_w = dst_image.shape[:2]
+        large_h, large_w = img_panorama.shape[:2]
+        y_start = pad_struct.pad_up  # Subtract y_offset to move up
+        y_end = y_start + small_h
+        x_start = pad_struct.pad_left  # Add x_offset to move right
+        x_end = x_start + small_w
+
+
         # (6) place the backward warped image in the indices where the panorama
         #     image is zero.
         img_panorama[0:backward_warping.shape[0],
         0:backward_warping.shape[1]] = backward_warping
 
-
-
+        img_panorama[y_start:y_end, x_start:x_end] = dst_image
+        """img_panorama[pad_struct.pad_up:pad_struct.pad_up + dst_image.shape[0],
+        pad_struct.pad_left:pad_struct.pad_left + dst_image.shape[1]] = dst_image"""
+        plt.imshow(img_panorama)
+        plt.show()
 
         return np.clip(img_panorama, 0, 255).astype(np.uint8)
