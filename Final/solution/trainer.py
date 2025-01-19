@@ -60,7 +60,33 @@ class Trainer:
         print_every = int(len(train_dataloader) / 10)
 
         for batch_idx, (inputs, targets) in enumerate(train_dataloader):
-            """INSERT YOUR CODE HERE."""
+
+            # Move data to the appropriate device
+            inputs, targets = inputs.to(device), targets.to(device)
+
+            # Zero the parameter gradients
+            self.optimizer.zero_grad()
+
+            # Forward pass
+            outputs = self.model(inputs)
+            loss = self.criterion(outputs, targets)
+
+            # Backward pass and optimization
+            loss.backward()
+            self.optimizer.step()
+
+            # Update metrics
+            total_loss += loss.item()
+            _, predicted = torch.max(outputs, 1)  # Get class predictions
+            nof_samples += targets.size(0)
+            correct_labeled_samples += (predicted == targets).sum().item()
+
+            # Calculate average loss and accuracy
+            avg_loss = total_loss / (batch_idx + 1)
+            accuracy = 100.0 * correct_labeled_samples / nof_samples
+
+
+
             if batch_idx % print_every == 0 or \
                     batch_idx == len(train_dataloader) - 1:
                 print(f'Epoch [{self.epoch:03d}] | Loss: {avg_loss:.3f} | '
@@ -92,7 +118,26 @@ class Trainer:
         print_every = max(int(len(dataloader) / 10), 1)
 
         for batch_idx, (inputs, targets) in enumerate(dataloader):
-            """INSERT YOUR CODE HERE."""
+
+            # Move data to the appropriate device
+            inputs, targets = inputs.to(device), targets.to(device)
+
+            # Forward pass
+            outputs = self.model(inputs)
+            loss = self.criterion(outputs, targets)
+
+            # Update metrics
+            total_loss += loss.item()
+            _, predicted = torch.max(outputs, 1)  # Get class predictions
+            nof_samples += targets.size(0)
+            correct_labeled_samples += (predicted == targets).sum().item()
+
+            # Calculate average loss and accuracy
+            avg_loss = total_loss / (batch_idx + 1)
+            accuracy = 100.0 * correct_labeled_samples / nof_samples
+
+
+
             if batch_idx % print_every == 0 or batch_idx == len(dataloader) - 1:
                 print(f'Epoch [{self.epoch:03d}] | Loss: {avg_loss:.3f} | '
                       f'Acc: {accuracy:.2f}[%] '
