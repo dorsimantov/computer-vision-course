@@ -11,6 +11,10 @@ from torch.utils.data import DataLoader
 from common import FIGURES_DIR
 from utils import load_dataset, load_model
 
+from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from pytorch_grad_cam.utils.image import show_cam_on_image
+
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -52,24 +56,24 @@ def get_grad_cam_visualization(test_dataset: torch.utils.data.Dataset,
         of batch size 1, it's a tensor of shape (1,)).
     """
     """INSERT YOUR CODE HERE, overrun return."""
-    # Step (b): Sample a single image from the dataset
+    # Sample a single image from the dataset
     dataloader = DataLoader(test_dataset, batch_size=1, shuffle=True)
     sample, true_label = next(iter(dataloader))
 
-    # Normalize image to [0, 1] for visualization
+    # Normalize image to [0, 1]
     image = sample.squeeze().permute(1, 2, 0).cpu().numpy()
     image = (image - image.min()) / (image.max() - image.min())
 
-    # Step (c): Compute Grad-CAM for the target layer model.conv3
+    # Compute Grad-CAM for the target layer model.conv3
     target_layer = model.conv3
-    with GradCAM(model=model, target_layers=[target_layer], use_cuda=torch.cuda.is_available()) as cam:
+    with GradCAM(model=model, target_layers=[target_layer]) as cam:
         # Compute Grad-CAM mask
         grayscale_cam = cam(input_tensor=sample.to(device), targets=None)  # No specific target class
 
-    # Resize the Grad-CAM mask to match the image size
+    # Resize the mask to match the image size
     grayscale_cam = grayscale_cam[0]  # Remove batch dimension
 
-    # Overlay Grad-CAM mask on the image
+    # Overlay mask on image
     visualization = show_cam_on_image(image, grayscale_cam, use_rgb=True)
 
     return visualization, true_label
