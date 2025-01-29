@@ -1,0 +1,370 @@
+[
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.6915338363599133,
+            0.6851217416492669
+        ],
+        "train_acc": [
+            52.593690450984546,
+            54.57336438704213
+        ],
+        "val_loss": [
+            0.7578621555019069,
+            0.6968901769534962
+        ],
+        "val_acc": [
+            52.26302305721605,
+            58.66780529461998
+        ],
+        "test_loss": [
+            0.8010963295187269,
+            0.7322556257247925
+        ],
+        "test_acc": [
+            48.5947416137806,
+            55.57570262919311
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.695528353186878,
+            0.6935944585381327
+        ],
+        "train_acc": [
+            50.27524878255346,
+            50.39170019055685
+        ],
+        "val_loss": [
+            0.6927129900133288,
+            0.6927491619780257
+        ],
+        "val_acc": [
+            50.81127241673783,
+            50.640478223740395
+        ],
+        "test_loss": [
+            0.6914942298616682,
+            0.6914454340934754
+        ],
+        "test_acc": [
+            54.85040797824116,
+            53.037171350861286
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.6942952299440229,
+            0.6934006959199905
+        ],
+        "train_acc": [
+            50.12703789964006,
+            49.640059284353164
+        ],
+        "val_loss": [
+            0.6934742718129545,
+            0.6978247375101656
+        ],
+        "val_acc": [
+            50.04269854824936,
+            50.04269854824936
+        ],
+        "test_loss": [
+            0.6935558591570173,
+            0.6995131628853934
+        ],
+        "test_acc": [
+            49.954669084315505,
+            49.954669084315505
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.694731527486363,
+            0.6933148497262517
+        ],
+        "train_acc": [
+            49.15308066906627,
+            50.06351894982003
+        ],
+        "val_loss": [
+            0.6932977389644932,
+            0.6930578834301716
+        ],
+        "val_acc": [
+            50.04269854824936,
+            50.55508112724167
+        ],
+        "test_loss": [
+            0.693247537953513,
+            0.6933414493288312
+        ],
+        "test_acc": [
+            49.954669084315505,
+            49.13871260199456
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.6939107221928803,
+            0.6848873369194366
+        ],
+        "train_acc": [
+            51.0798221469405,
+            53.7264450561084
+        ],
+        "val_loss": [
+            0.7081304772480114,
+            0.7587081250306722
+        ],
+        "val_acc": [
+            50.55508112724167,
+            53.20239111870196
+        ],
+        "test_loss": [
+            0.7103198204721723,
+            0.7769203671387264
+        ],
+        "test_acc": [
+            50.77062556663645,
+            48.050770625566635
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.695214490028652,
+            0.6934867722762598
+        ],
+        "train_acc": [
+            50.793986872750374,
+            49.820029642176586
+        ],
+        "val_loss": [
+            0.6935075312047392,
+            0.6932526875186611
+        ],
+        "val_acc": [
+            50.12809564474808,
+            49.44491887275833
+        ],
+        "test_loss": [
+            0.6936223370688303,
+            0.6931390115192958
+        ],
+        "test_acc": [
+            49.59202175883953,
+            51.31459655485041
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.6943545502585333,
+            0.6934835769840189
+        ],
+        "train_acc": [
+            50.455219140376876,
+            49.70357823417319
+        ],
+        "val_loss": [
+            1.7330965637355238,
+            0.6930440100463661
+        ],
+        "val_acc": [
+            49.61571306575576,
+            50.29888983774552
+        ],
+        "test_loss": [
+            1.8168926571096693,
+            0.6928597348076957
+        ],
+        "test_acc": [
+            47.32547597461469,
+            50.31731640979148
+        ]
+    },
+    {
+        "model": "XceptionBased",
+        "dataset": "synthetic_dataset",
+        "optimizer": {
+            "name": "Adam",
+            "params": {
+                "lr": 0.001,
+                "betas": [
+                    0.9,
+                    0.999
+                ],
+                "eps": 1e-08,
+                "weight_decay": 0,
+                "amsgrad": false,
+                "maximize": false,
+                "foreach": null,
+                "capturable": false,
+                "differentiable": false,
+                "fused": null
+            }
+        },
+        "train_loss": [
+            0.5375734329525683,
+            0.10322088560504297
+        ],
+        "train_acc": [
+            66.8536946855812,
+            96.43235231844167
+        ],
+        "val_loss": [
+            0.5403304027649446,
+            0.04337417285864216
+        ],
+        "val_acc": [
+            84.11614005123826,
+            98.12126387702818
+        ],
+        "test_loss": [
+            0.5367200772470824,
+            0.030992115438649697
+        ],
+        "test_acc": [
+            83.49954669084316,
+            98.73073436083409
+        ]
+    }
+]

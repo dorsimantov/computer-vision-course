@@ -52,7 +52,27 @@ def get_grad_cam_visualization(test_dataset: torch.utils.data.Dataset,
         of batch size 1, it's a tensor of shape (1,)).
     """
     """INSERT YOUR CODE HERE, overrun return."""
-    return np.random.rand(256, 256, 3), torch.randint(0, 2, (1,))
+    # Step (b): Sample a single image from the dataset
+    dataloader = DataLoader(test_dataset, batch_size=1, shuffle=True)
+    sample, true_label = next(iter(dataloader))
+
+    # Normalize image to [0, 1] for visualization
+    image = sample.squeeze().permute(1, 2, 0).cpu().numpy()
+    image = (image - image.min()) / (image.max() - image.min())
+
+    # Step (c): Compute Grad-CAM for the target layer model.conv3
+    target_layer = model.conv3
+    with GradCAM(model=model, target_layers=[target_layer], use_cuda=torch.cuda.is_available()) as cam:
+        # Compute Grad-CAM mask
+        grayscale_cam = cam(input_tensor=sample.to(device), targets=None)  # No specific target class
+
+    # Resize the Grad-CAM mask to match the image size
+    grayscale_cam = grayscale_cam[0]  # Remove batch dimension
+
+    # Overlay Grad-CAM mask on the image
+    visualization = show_cam_on_image(image, grayscale_cam, use_rgb=True)
+
+    return visualization, true_label
 
 
 def main():
