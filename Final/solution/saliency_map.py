@@ -70,8 +70,8 @@ def compute_gradient_saliency_maps(samples: torch.tensor,
     gradients = samples.grad
     gradients_norm = gradients.abs()
     saliency = gradients_norm.max(dim=1)[0]
-    # Handle both NaNs and zero values
-    saliency[:,0,0] = 1e-9
+    # Handle zero values
+    saliency[:, 0, 0] = 1e-9
     saliency[:, 1, 1] = 2*1e-9
     return saliency
 
