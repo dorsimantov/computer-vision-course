@@ -6,15 +6,15 @@ import matplotlib.image as mpimg
 from solution import Solution
 
 
-COST1 = 0.5
-COST2 = 3.0
-WIN_SIZE = 3
-DISPARITY_RANGE = 20
+COST1 = 1.0
+COST2 = 5.0          # YOU MAY CHANGE THIS
+WIN_SIZE = 3          # YOU MAY CHANGE THIS
+DISPARITY_RANGE = 15  # YOU MAY CHANGE THIS
 ##########################################################
 # Don't forget to fill in your IDs!!!
 # students' IDs:
-ID1 = '123456789'
-ID2 = '987654321'
+ID1 = '318452364'
+ID2 = '318869997'
 ##########################################################
 
 
@@ -49,6 +49,10 @@ def load_data(is_your_data=False):
 
 
 def main():
+    COST1 = 0.5
+    COST2 = 3.0
+    WIN_SIZE = 3
+    DISPARITY_RANGE = 20
     left_image, right_image = load_data()
     solution = Solution()
     # Compute Sum-Square-Diff distance
@@ -72,6 +76,7 @@ def main():
     plt.imshow(label_map)
     plt.colorbar()
     plt.title('Naive Depth')
+    plt.show()
 
     # Smooth disparity image - Dynamic Programming
     tt = tic()
@@ -87,6 +92,7 @@ def main():
     plt.imshow(label_smooth_dp)
     plt.colorbar()
     plt.title('Smooth Depth - DP')
+    plt.show()
 
     # Compute forward map of the left image to the right image.
     mapped_image_smooth_dp = forward_map(left_image, labels=label_smooth_dp)
@@ -101,6 +107,7 @@ def main():
     plt.subplot(1, 3, 3)
     plt.imshow(right_image)
     plt.title('Right Image')
+    plt.show()
 
     # Generate a dictionary which maps each direction to a label map:
     tt = tic()
@@ -121,6 +128,7 @@ def main():
         else:
             plt.imshow(direction_to_vote[i - 1])
             plt.title(f'Direction {i - 1}')
+    plt.show()
 
     # Smooth disparity image - Semi-Global Mapping
     tt = tic()
@@ -136,6 +144,7 @@ def main():
     plt.imshow(label_smooth_sgm)
     plt.colorbar()
     plt.title('Smooth Depth - SGM')
+    plt.show()
 
     # Plot the forward map based on the Semi-Global Mapping result:
     mapped_image_smooth_sgm = forward_map(left_image, labels=label_smooth_sgm)
@@ -149,14 +158,17 @@ def main():
     plt.subplot(1, 3, 3)
     plt.imshow(right_image)
     plt.title('Right Image')
+    plt.show()
+
+
 
     ###########################################################################
     ########################### YOUR IMAGE PLAYGROUND #########################
     ###########################################################################
-    COST1 = 0.5           # YOU MAY CHANGE THIS
-    COST2 = 3.0           # YOU MAY CHANGE THIS
+    COST1 = 1.0
+    COST2 = 5.0          # YOU MAY CHANGE THIS
     WIN_SIZE = 3          # YOU MAY CHANGE THIS
-    DISPARITY_RANGE = 20  # YOU MAY CHANGE THIS
+    DISPARITY_RANGE = 15  # YOU MAY CHANGE THIS
 
     your_left_image, your_right_image = load_data(is_your_data=True)
     solution = Solution()
@@ -177,6 +189,7 @@ def main():
     # Plot all directions as well as the image, in the center of the plot:
     plt.figure()
     for i in range(1, 1 + 9):
+        print(i)
         plt.subplot(3, 3, i)
         if i < 5:
             plt.imshow(your_direction_to_vote[i])
@@ -187,7 +200,7 @@ def main():
         else:
             plt.imshow(your_direction_to_vote[i - 1])
             plt.title(f'Direction {i - 1}')
-
+    plt.show()
     # Smooth disparity image - Semi-Global Mapping
     tt = tic()
     your_label_smooth_sgm = solution.sgm_labeling(your_ssdd, COST1, COST2)
